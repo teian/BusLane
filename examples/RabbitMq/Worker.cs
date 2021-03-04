@@ -1,41 +1,92 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using App.Metrics;
+using App.Metrics.Meter;
+using App.Metrics.Timer;
 using BusLane.Consuming;
 using BusLane.Producing;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RabbitMq
 {
     public class Worker : BackgroundService
     {
-        private readonly ILogger<Worker> _Logger;
         private readonly IMessageConsumer _MessageConsumer;
         private readonly IMessageProducer _MessageProducer;
+        private readonly IMetrics _Metrics;
+        private readonly TimerOptions _PublishTimer;
+        private readonly MeterOptions _PublishMeter;
+        private readonly MeterOptions _ConsumeMeter;
 
-        public Worker(ILogger<Worker> logger, IMessageConsumer messageConsumer, IMessageProducer messageProducer)
+        public Worker(
+            IMessageConsumer messageConsumer,
+            IMessageProducer messageProducer,
+            IMetrics metrics)
         {
-            _Logger = logger;
-            _MessageConsumer = messageConsumer;
-            _MessageProducer = messageProducer;
+            _MessageConsumer = messageConsumer ?? throw new ArgumentNullException(nameof(messageConsumer));
+            _MessageProducer = messageProducer ?? throw new ArgumentNullException(nameof(messageProducer));
+            _Metrics = metrics ?? throw new ArgumentNullException(nameof(metrics));
+
+            _PublishMeter = new MeterOptions
+            {
+                Name = "Publish Message/s",
+                MeasurementUnit = Unit.Calls,
+                RateUnit = TimeUnit.Seconds
+            };
+
+            _PublishTimer = new TimerOptions
+            {
+                Name = "Publish Message latency/ms",
+                MeasurementUnit = Unit.Requests,
+                DurationUnit = TimeUnit.Milliseconds,
+                RateUnit = TimeUnit.Milliseconds
+            };
+            
+            _ConsumeMeter = new MeterOptions
+            {
+                Name = "Consume Message/s",
+                MeasurementUnit = Unit.Calls,
+                RateUnit = TimeUnit.Seconds
+            };
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await _MessageConsumer.SubscribeAsync<TestMessage>("test", HandleMessage, stoppingToken);
 
-            while (!stoppingToken.IsCancellationRequested)
+            for (int taskCount = Environment.ProcessorCount; taskCount > 0; taskCount--)
             {
-                await _MessageProducer.PublishAsync(
-                    "test",
-                    new TestMessage()
+                await Task.Run(
+                    () =>
                     {
-                        Test = "foo"
+                        while (!stoppingToken.IsCancellationRequested)
+                        {
+                            _Metrics.Measure.Timer.Time(
+                                _PublishTimer,
+                                async () => await PublishMessageAsync(stoppingToken));
+                        }
                     },
                     stoppingToken);
-                await Task.Delay(1, stoppingToken);
             }
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                await Task.Delay(10, stoppingToken);
+            }
+        }
+
+        private async Task PublishMessageAsync(CancellationToken token)
+        {
+            await _MessageProducer.PublishAsync(
+                "test",
+                new TestMessage()
+                {
+                    Test = "foo"
+                },
+                token);
+            
+            _Metrics.Measure.Meter.Mark(_PublishMeter);
         }
 
         private async Task HandleMessage(TestMessage message, CancellationToken token)
@@ -43,7 +94,7 @@ namespace RabbitMq
             await Task.Run(
                 () =>
                 {
-                    _Logger.LogInformation("Received message at {Timestamp:o}", DateTime.UtcNow);
+                    _Metrics.Measure.Meter.Mark(_ConsumeMeter);
                 },
                 token);
         }
