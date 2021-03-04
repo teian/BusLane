@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>Mes.Core.Libraries.Messaging.Protobuf</RootNamespace>
+    <AssemblyName>Mes.Core.Libraries.Messaging.Protobuf</AssemblyName>
+    <IsPackable>true</IsPackable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.1\Mes.Core.Libraries.Messaging.Protobuf.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="protobuf-net" Version="3.0.73" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BusLane\BusLane.csproj" />
+  </ItemGroup>
+
+</Project>
