@@ -1,10 +1,9 @@
-﻿using BusLane.Serializing;
-using ProtoBuf;
-using System.IO;
+﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using ProtoBuf;
 
-namespace Mes.Core.Libraries.Messaging.Protobuf
+namespace BusLane.Serializing.MessagePack
 {
     /// <summary>
     /// An <see cref="IMessageDeserializer"/> for Protobuf messages.

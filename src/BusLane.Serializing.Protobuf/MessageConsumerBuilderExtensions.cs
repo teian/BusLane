@@ -1,6 +1,6 @@
 ﻿using BusLane.Consuming;
 
-namespace Mes.Core.Libraries.Messaging.Protobuf
+namespace BusLane.Serializing.MessagePack
 {
     /// <summary>
     /// Contains extension methods for the <see cref="MessageConsumerBuilder"/> type.
