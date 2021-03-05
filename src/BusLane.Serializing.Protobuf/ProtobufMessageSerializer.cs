@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ProtoBuf;
 
-namespace BusLane.Serializing.MessagePack
+namespace BusLane.Serializing.Protobuf
 {
     /// <summary>
     /// An <see cref="IMessageSerializer"/> for Protobuf messages.

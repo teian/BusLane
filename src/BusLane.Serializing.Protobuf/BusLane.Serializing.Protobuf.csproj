@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <RootNamespace>BusLane.Serializing.MessagePack</RootNamespace>
-    <AssemblyName>BusLane.Serializing.MessagePack</AssemblyName>
     <IsPackable>true</IsPackable>
     <LangVersion>latest</LangVersion>
     <PackageVersion>0.2-beta.1</PackageVersion>
@@ -15,7 +13,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>message, bus, event bus, events</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>BusLane.Serializing.MessagePack</PackageId>
+    <PackageId>BusLane.Serializing.Protobuf</PackageId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
