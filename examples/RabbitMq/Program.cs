@@ -20,12 +20,16 @@ namespace RabbitMq
                     {
                         string rmqHost = hostContext.Configuration.GetValue("Rabbitmq:HostName", "127.0.0.1");
                         int rmqPort = hostContext.Configuration.GetValue("Rabbitmq:Port", 5672);
+                        string rmqUser = hostContext.Configuration.GetValue("Rabbitmq:Username", "guest");
+                        string rmqPassword = hostContext.Configuration.GetValue("Rabbitmq:Password", "guest");
                         
                         services.AddRabbitMqMessageProducer(
                             connectionConfig =>
                             {
                                 connectionConfig.HostName = rmqHost;
                                 connectionConfig.Port = rmqPort;
+                                connectionConfig.UserName = rmqUser;
+                                connectionConfig.Password = rmqPassword;
                             },
                             messageSerializer: new MessagePackMessageSerializer());
 
@@ -34,6 +38,8 @@ namespace RabbitMq
                             {
                                 connectionConfig.HostName = rmqHost;
                                 connectionConfig.Port = rmqPort;
+                                connectionConfig.UserName = rmqUser;
+                                connectionConfig.Password = rmqPassword;
                             },
                             messageDeserializer: new MessagePackMessageDeserializer());
 
