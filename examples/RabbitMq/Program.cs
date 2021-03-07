@@ -1,8 +1,8 @@
-using BusLane.Serializing.MessagePack;
 using BusLane.Transport.RabbitMQ;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Shared;
 
 namespace RabbitMq
 {
@@ -18,6 +18,8 @@ namespace RabbitMq
                 .ConfigureServices(
                     (hostContext, services) =>
                     {
+                        services.AddOptions<WorkerOptions>().Bind(hostContext.Configuration.GetSection("Worker"));
+                        
                         string rmqHost = hostContext.Configuration.GetValue("Rabbitmq:HostName", "127.0.0.1");
                         int rmqPort = hostContext.Configuration.GetValue("Rabbitmq:Port", 5672);
                         string rmqUser = hostContext.Configuration.GetValue("Rabbitmq:Username", "guest");
@@ -30,8 +32,7 @@ namespace RabbitMq
                                 connectionConfig.Port = rmqPort;
                                 connectionConfig.UserName = rmqUser;
                                 connectionConfig.Password = rmqPassword;
-                            },
-                            messageSerializer: new MessagePackMessageSerializer());
+                            });
 
                         services.AddRabbitMqMessageConsumer(
                             connectionConfig =>
@@ -40,8 +41,7 @@ namespace RabbitMq
                                 connectionConfig.Port = rmqPort;
                                 connectionConfig.UserName = rmqUser;
                                 connectionConfig.Password = rmqPassword;
-                            },
-                            messageDeserializer: new MessagePackMessageDeserializer());
+                            });
 
                         services.AddHostedService<Worker>();
                     });

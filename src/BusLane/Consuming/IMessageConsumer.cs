@@ -17,7 +17,7 @@ namespace BusLane.Consuming
         /// <exception cref="MessagingException">Thrown if communication with the message broker failed.</exception>
         Task SubscribeAsync<TMessage>(
             string topic,
-            Func<TMessage?, CancellationToken, Task> messageReceiveAsync,
+            Func<TMessage, CancellationToken, Task> messageReceiveAsync,
             CancellationToken cancellationToken = default);
 
         /// <summary>

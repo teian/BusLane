@@ -1,6 +1,6 @@
 ﻿using MessagePack;
 
-namespace RabbitMq
+namespace Shared
 {
     [MessagePackObject]
     public class TestMessage

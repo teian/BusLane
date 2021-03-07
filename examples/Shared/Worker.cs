@@ -1,26 +1,26 @@
-using BusLane.Consuming;
+﻿using BusLane.Consuming;
 using BusLane.Producing;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RabbitMq
+namespace Shared
 {
     public class Worker : BackgroundService
     {
-        private readonly IConfiguration _Config;
+        private readonly WorkerOptions _Options;
         private readonly IMessageConsumer _MessageConsumer;
         private readonly IMessageProducer _MessageProducer;
 
         public Worker(
-            IConfiguration config,
+            IOptions<WorkerOptions> options,
             IMessageConsumer messageConsumer,
             IMessageProducer messageProducer)
         {
-            _Config = config ?? throw new ArgumentNullException(nameof(config));
+            _Options = options.Value ?? throw new ArgumentNullException(nameof(options));
             _MessageConsumer = messageConsumer ?? throw new ArgumentNullException(nameof(messageConsumer));
             _MessageProducer = messageProducer ?? throw new ArgumentNullException(nameof(messageProducer));
         }
@@ -30,7 +30,7 @@ namespace RabbitMq
             await _MessageConsumer.SubscribeAsync<TestMessage>("test", HandleMessage, stoppingToken);
 
             List<Task> messageProducerWorker = new List<Task>();
-            for (int taskCount = _Config.GetValue("Producer:NumberOfTasks", 1); taskCount > 0; taskCount--)
+            for (int taskCount = _Options.NumberOfTasks; taskCount > 0; taskCount--)
             {
                 messageProducerWorker.Add(Task.Run(() => PublishMessageAsync(stoppingToken), stoppingToken));
             }

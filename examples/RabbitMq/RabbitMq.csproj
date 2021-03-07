@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <UserSecretsId>dotnet-RabbitMq-DC8AB5E6-F86A-4E51-9B3E-D139462138E3</UserSecretsId>
         <LangVersion>default</LangVersion>
     </PropertyGroup>
@@ -13,5 +13,6 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\BusLane.Serializing.MessagePack\BusLane.Serializing.MessagePack.csproj" />
       <ProjectReference Include="..\..\src\BusLane.Transport.RabbitMQ\BusLane.Transport.RabbitMQ.csproj" />
+      <ProjectReference Include="..\Shared\Shared.csproj" />
     </ItemGroup>
 </Project>

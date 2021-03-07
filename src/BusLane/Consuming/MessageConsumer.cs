@@ -49,7 +49,7 @@ namespace BusLane.Consuming
         /// <exception cref="MessagingException">Thrown if communication with the message broker failed.</exception>
         public async Task SubscribeAsync<TMessage>(
             string topic,
-            Func<TMessage?, CancellationToken, Task> messageReceiveCallback,
+            Func<TMessage, CancellationToken, Task> messageReceiveCallback,
             CancellationToken cancellationToken = default)
         {
             if (_TopicSubscriptions.ContainsKey(topic.ToLowerInvariant()) == false)
@@ -60,9 +60,20 @@ namespace BusLane.Consuming
                         topic,
                         async (rawMessage) =>
                         {
-                            TMessage decodedMessage =
-                                await _Deserializer.DeserializeAsync<TMessage>(rawMessage, cancellationToken);
-                            await messageReceiveCallback.Invoke(decodedMessage, cancellationToken);
+                            try
+                            {
+                                TMessage decodedMessage =
+                                    await _Deserializer.DeserializeAsync<TMessage>(rawMessage, cancellationToken);
+                                
+                                if (decodedMessage != null)
+                                {
+                                    await messageReceiveCallback.Invoke(decodedMessage, cancellationToken);
+                                }
+                            }
+                            catch(Exception ex)
+                            {
+                                _Logger.LogError(ex, "Failed to consume a message");
+                            }                            
                         },
                         cancellationToken);
                 }

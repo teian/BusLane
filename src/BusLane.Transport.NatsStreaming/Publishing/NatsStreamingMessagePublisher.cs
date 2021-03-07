@@ -1,44 +1,42 @@
 ﻿using BusLane.Exceptions;
 using Microsoft.Extensions.Logging;
-using RabbitMQ.Client;
+using STAN.Client;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace BusLane.Transport.RabbitMQ.Publishing
+namespace BusLane.Transport.NatsStreaming.Publishing
 {
     /// <summary>
     /// An <see cref="IMessagePublisher"/> that publishes messages to a RabbitMQ broker.
     /// </summary>
-    internal sealed class RabbitMqMessagePublisher : IMessagePublisher
+    internal sealed class NatsStreamingMessagePublisher : IMessagePublisher
     {
-        private readonly ILogger<RabbitMqMessagePublisher> _Logger;
-        private readonly bool _UseDurableExchange;
-        private readonly string _Exchange;
-        private readonly IModel _Channel;
-        private readonly IConnection _Connection;
+        private readonly ILogger<NatsStreamingMessagePublisher> _Logger;
 
         /// <summary>
-        /// Initializes a new <see cref="RabbitMqMessagePublisher"/>.
+        /// Gets the connection to the message broker.
+        /// </summary>
+        private readonly IStanConnection _Connection;
+
+        /// <summary>
+        /// Initializes a new <see cref="NatsStreamingMessagePublisher"/>.
         /// </summary>
         /// <param name="logger">The logger to write to.</param>
-        /// <param name="connectionFactory">The factory to create connections to the broker from.</param>
-        /// <param name="exchange">The name of the exchange to use</param>
-        /// <param name="useDurableExchange">Indicates whether the exchange for durable messages should be used.</param>
-        /// <param name="doAutoDeleteExchange">Deletes the exchange when the last channel leaves.</param>
-        public RabbitMqMessagePublisher(
-            ILogger<RabbitMqMessagePublisher> logger,
-            IConnectionFactory connectionFactory,
-            string exchange = Constants.DefaultExchange,
-            bool useDurableExchange = true,
-            bool doAutoDeleteExchange = false)
+        /// <param name="clusterId">The cluster ID of streaming server.</param>
+        /// <param name="clientId">A unique ID for this connection.</param>
+        /// <param name="options">Connection options</param>
+        public NatsStreamingMessagePublisher(
+            ILogger<NatsStreamingMessagePublisher> logger,
+            string clusterId,
+            string clientId,
+            StanOptions? options = null)
         {
             _Logger = logger;
-            _Exchange = exchange;
-            _UseDurableExchange = useDurableExchange;
-            _Connection = connectionFactory.CreateConnection();
-            _Channel = _Connection.CreateModel();
-            _Channel.ExchangeDeclare(_Exchange, ExchangeType.Topic, _UseDurableExchange, doAutoDeleteExchange);
+            _Connection = new StanConnectionFactory().CreateConnection(
+                clusterId,
+                clientId,
+                options ?? StanOptions.GetDefaultOptions());
         }
 
         /// <summary>
@@ -60,15 +58,7 @@ namespace BusLane.Transport.RabbitMQ.Publishing
 
             try
             {
-                await Task.Run(() =>
-                    {
-                        IBasicProperties properties = _Channel.CreateBasicProperties();
-                        properties.Persistent = _UseDurableExchange;
-                        properties.DeliveryMode = _UseDurableExchange ? (byte) 2 : (byte) 1;
-                        _Channel.BasicPublish(_Exchange, topic, false, properties, message);
-                    },
-                    cancellationToken);
-
+                await _Connection.PublishAsync(topic, message.ToArray());
                 _Logger.LogDebug("Published to topic '{Topic}'", topic);
             }
             catch (Exception publishException)
@@ -84,8 +74,6 @@ namespace BusLane.Transport.RabbitMQ.Publishing
         /// <returns>A task that represents the asynchronous dispose operation.</returns>
         public void Dispose()
         {
-            _Channel.Close();
-            _Channel.Dispose();
             _Connection.Close();
             _Connection.Dispose();
         }
