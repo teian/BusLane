@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>default</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageVersion>0.2-beta.1</PackageVersion>
+    <PackageVersion>0.3-beta.1</PackageVersion>
     <Description>BusLane ist a simple message bus abstraction which can be used to decouple specific broker implementations from your code</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/teian/BusLane</PackageProjectUrl>
