@@ -22,6 +22,16 @@ namespace BusLane.Transport.RabbitMQ
         /// <param name="exchangeName">The exchange to use</param>
         /// <param name="useDurableExchange">Whether the exchange is durable or not</param>
         /// <param name="doAutoDeleteExchange">Automatically delete the exchange if no queues are bound.</param>
+        /// <param name="exchangeType">RabbitMQ specific exchange types (direct|fanout|headers|topic)</param>
+        /// <param name="queueName">
+        /// The name of the queue.
+        /// If the same name of the queue is used, a competing consumer pattern is used.
+        /// See: https://www.enterpriseintegrationpatterns.com/patterns/messaging/CompetingConsumers.html
+        /// and https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
+        /// </param>
+        /// <param name="useDurableQueue">The queue will survive a broker restart</param>
+        /// <param name="useExclusiveQueue">Used by only one connection and the queue will be deleted when that connection closes</param>
+        /// <param name="autoDeleteQueue">Queue that has had at least one consumer is deleted when last consumer unsubscribes</param>
         /// <param name="cancellationToken">A cancellation token</param>
         /// <returns>The RabbitMQ configures <see cref="MessageConsumerBuilder"/>.</returns>
         public static MessageConsumerBuilder AddRabbitMqReceiver(
@@ -30,6 +40,11 @@ namespace BusLane.Transport.RabbitMQ
             string exchangeName = Constants.DefaultExchange,
             bool useDurableExchange = true,
             bool doAutoDeleteExchange = false,
+            string exchangeType = ExchangeType.Topic,
+            string queueName = "",
+            bool useDurableQueue = true,
+            bool useExclusiveQueue = false,
+            bool autoDeleteQueue = false,
             CancellationToken cancellationToken = default)
         {
             ConnectionFactory connectionFactory = new ConnectionFactory();
@@ -42,6 +57,11 @@ namespace BusLane.Transport.RabbitMQ
                     exchangeName,
                     useDurableExchange,
                     doAutoDeleteExchange,
+                    exchangeType,
+                    queueName,
+                    useDurableQueue,
+                    useExclusiveQueue,
+                    autoDeleteQueue,
                     cancellationToken));
             return builder;
         }
@@ -54,6 +74,16 @@ namespace BusLane.Transport.RabbitMQ
         /// <param name="exchangeName">The exchange to use</param>
         /// <param name="useDurableExchange">Whether the exchange is durable or not</param>
         /// <param name="doAutoDeleteExchange">Automatically delete the exchange if no queues are bound.</param>
+        /// <param name="exchangeType">RabbitMQ specific exchange types (direct|fanout|headers|topic)</param>
+        /// <param name="queueName">
+        /// The name of the queue.
+        /// If the same name of the queue is used, a competing consumer pattern is used.
+        /// See: https://www.enterpriseintegrationpatterns.com/patterns/messaging/CompetingConsumers.html
+        /// and https://www.rabbitmq.com/tutorials/tutorial-two-dotnet.html
+        /// </param>
+        /// <param name="useDurableQueue">The queue will survive a broker restart</param>
+        /// <param name="useExclusiveQueue">Used by only one connection and the queue will be deleted when that connection closes</param>
+        /// <param name="autoDeleteQueue">Queue that has had at least one consumer is deleted when last consumer unsubscribes</param>
         /// <param name="messageDeserializer">A <see cref="IMessageDeserializer"/> to use.</param>
         /// <param name="cancellationToken">A cancellation token</param>
         /// <returns>A RabbitMQ message consumer</returns>
@@ -63,6 +93,11 @@ namespace BusLane.Transport.RabbitMQ
             string exchangeName = Constants.DefaultExchange,
             bool useDurableExchange = true,
             bool doAutoDeleteExchange = false,
+            string exchangeType = ExchangeType.Topic,
+            string queueName = "",
+            bool useDurableQueue = true,
+            bool useExclusiveQueue = false,
+            bool autoDeleteQueue = false,
             IMessageDeserializer? messageDeserializer = null,
             CancellationToken cancellationToken = default)
         {
@@ -79,6 +114,11 @@ namespace BusLane.Transport.RabbitMQ
                         exchangeName,
                         useDurableExchange,
                         doAutoDeleteExchange,
+                        exchangeType,
+                        queueName,
+                        useDurableQueue,
+                        useExclusiveQueue,
+                        autoDeleteQueue,
                         cancellationToken);
                 });
             return services;
