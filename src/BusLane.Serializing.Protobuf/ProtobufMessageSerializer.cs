@@ -16,13 +16,12 @@ namespace BusLane.Serializing.Protobuf
         /// <param name="item">The message to serialize.</param>
         /// <param name="target">The stream to write to.</param>
         /// <param name="token">A token to cancel the operation with.</param>
-        public Task SerializeAsync<TMessage>(
+        public async Task SerializeAsync<TMessage>(
             TMessage item,
             Stream target,
             CancellationToken token = default)
         {
-            Serializer.Serialize(target, item);
-            return Task.CompletedTask;
+            await Task.Run(() => Serializer.Serialize(target, item), token).ConfigureAwait(false);
         }
     }
 }

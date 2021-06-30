@@ -16,10 +16,9 @@ namespace BusLane.Serializing.Protobuf
         /// <param name="source">A stream to read from.</param>
         /// <param name="token">A token to cancel the operation with.</param>
         /// <returns>The deserialized message object.</returns>
-        public Task<TMessage> DeserializeAsync<TMessage>(Stream source, CancellationToken token = default)
+        public async Task<TMessage?> DeserializeAsync<TMessage>(Stream source, CancellationToken token = default)
         {
-            return Task.FromResult(Serializer.Deserialize<TMessage>(source));
+            return await Task.Run(() => Serializer.Deserialize<TMessage?>(source), token).ConfigureAwait(false);
         }
-        
     }
 }
