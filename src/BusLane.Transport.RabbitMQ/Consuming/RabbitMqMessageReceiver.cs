@@ -87,11 +87,18 @@ namespace BusLane.Transport.RabbitMQ.Consuming
             CancellationToken cancellationToken = default)
         {
             _Cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            _Logger = logger;
+            _Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _ExchangeName = exchangeName;
             _Connection = connectionFactory.CreateConnection();
             _Channel = _Connection.CreateModel();
 
+            if (!ExchangeType.All().Contains(exchangeType))
+            {
+                throw new ArgumentException(
+                    "the given exchange type is not valid, valid values are direct, fanout, headers and topic.",
+                    nameof(exchangeType));
+            }
+            
             _Channel.ExchangeDeclare(_ExchangeName, exchangeType, useDurableExchange, doAutoDeleteExchange);
             _QueueName = _Channel.QueueDeclare(queueName, useDurableQueue, useExclusiveQueue, autoDeleteQueue).QueueName;
 
