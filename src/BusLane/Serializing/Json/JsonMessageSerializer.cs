@@ -21,7 +21,7 @@ namespace BusLane.Serializing.Json
             Stream target,
             CancellationToken token = default)
         {
-            await JsonSerializer.SerializeAsync(target, item, cancellationToken: token);
+            await JsonSerializer.SerializeAsync(target, item, cancellationToken: token).ConfigureAwait(false);
         }
     }
 }
