@@ -1,20 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <IsPackable>true</IsPackable>
+  <PropertyGroup>    
+    <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
     <LangVersion>latest</LangVersion>
-    <PackageVersion>0.2-beta.1</PackageVersion>
-    <Description>BusLane ist a simple message bus abstraction which can be used to decouple specific broker implementations from your code</Description>
+    <Nullable>enable</Nullable>    
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    
+    <PackageId>BusLane.Serializing.Protobuf</PackageId>
+    <PackageVersion>0.3-beta.1</PackageVersion>    
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/teian/BusLane</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/teian/BusLane</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>message, bus, event bus, events</PackageTags>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>BusLane.Serializing.Protobuf</PackageId>
-    <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
-    <Nullable>enable</Nullable>
+    <Description>BusLane ist a simple message bus abstraction which can be used to decouple specific broker implementations from your code</Description>
+    <PackageTags>buslane, message, bus, event bus, events, protobuf, serializing</PackageTags>    
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -27,6 +30,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BusLane\BusLane.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\images\icon.png" Pack="true" PackagePath="\"/>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>
