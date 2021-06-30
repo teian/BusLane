@@ -62,7 +62,7 @@ namespace BusLane.Consuming
                         {
                             try
                             {
-                                TMessage decodedMessage =
+                                TMessage? decodedMessage =
                                     await _Deserializer.DeserializeAsync<TMessage>(rawMessage, cancellationToken);
                                 
                                 if (decodedMessage != null)
