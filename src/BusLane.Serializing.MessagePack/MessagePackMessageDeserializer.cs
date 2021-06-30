@@ -19,7 +19,8 @@ namespace BusLane.Serializing.MessagePack
             Stream source,
             CancellationToken token = default)
         {
-            return await MessagePackSerializer.DeserializeAsync<TMessage>(source, cancellationToken: token);
+            return await MessagePackSerializer.DeserializeAsync<TMessage>(source, cancellationToken: token)
+                                              .ConfigureAwait(false);
         }
     }
 }
