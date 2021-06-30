@@ -24,21 +24,31 @@ namespace BusLane.Transport.RabbitMQ.Publishing
         /// <param name="logger">The logger to write to.</param>
         /// <param name="connectionFactory">The factory to create connections to the broker from.</param>
         /// <param name="exchange">The name of the exchange to use</param>
+        /// <param name="exchangeType">RabbitMQ specific exchange types (direct|fanout|headers|topic)</param>
         /// <param name="useDurableExchange">Indicates whether the exchange for durable messages should be used.</param>
         /// <param name="doAutoDeleteExchange">Deletes the exchange when the last channel leaves.</param>
         public RabbitMqMessagePublisher(
             ILogger<RabbitMqMessagePublisher> logger,
             IConnectionFactory connectionFactory,
             string exchange = Constants.DefaultExchange,
+            string exchangeType = ExchangeType.Topic,
             bool useDurableExchange = true,
             bool doAutoDeleteExchange = false)
         {
-            _Logger = logger;
+            _Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _Exchange = exchange;
             _UseDurableExchange = useDurableExchange;
             _Connection = connectionFactory.CreateConnection();
             _Channel = _Connection.CreateModel();
-            _Channel.ExchangeDeclare(_Exchange, ExchangeType.Topic, _UseDurableExchange, doAutoDeleteExchange);
+
+            if (!ExchangeType.All().Contains(exchangeType))
+            {
+                throw new ArgumentException(
+                    "the given exchange type is not valid, valid values are direct, fanout, headers and topic.",
+                    nameof(exchangeType));
+            }
+            
+            _Channel.ExchangeDeclare(_Exchange, exchangeType, _UseDurableExchange, doAutoDeleteExchange);
         }
 
         /// <summary>
