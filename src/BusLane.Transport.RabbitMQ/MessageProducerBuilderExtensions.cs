@@ -19,6 +19,7 @@ namespace BusLane.Transport.RabbitMQ
         /// <param name="builder">The builder to add to.</param>
         /// <param name="connectionConfiguration">Configures the RabbitMQ connection factory.</param>
         /// <param name="exchangeName">The name of the exchange to use.</param>
+        /// <param name="exchangeType">RabbitMQ specific exchange types (direct|fanout|headers|topic)</param>
         /// <param name="useDurableExchange">Indicates whether the exchange for durable messages should be used.</param>
         /// <param name="doAutoDeleteExchange">Deletes the exchange when the last channel leaves.</param>
         /// <returns>The builder.</returns>
@@ -26,6 +27,7 @@ namespace BusLane.Transport.RabbitMQ
             this MessageProducerBuilder builder,
             Action<ConnectionFactory> connectionConfiguration,
             string exchangeName = Constants.DefaultExchange,
+            string exchangeType = ExchangeType.Topic,
             bool useDurableExchange = true,
             bool doAutoDeleteExchange = false)
         {
@@ -37,6 +39,7 @@ namespace BusLane.Transport.RabbitMQ
                     builder.LoggerFactory.CreateLogger<RabbitMqMessagePublisher>(),
                     connectionFactory,
                     exchangeName,
+                    exchangeType,
                     useDurableExchange,
                     doAutoDeleteExchange));
         }
@@ -47,6 +50,7 @@ namespace BusLane.Transport.RabbitMQ
         /// <param name="services">The service collection to add to.</param>
         /// <param name="configureConnection">Configures the RabbitMQ connection factory</param>
         /// <param name="exchangeName">The exchange to use</param>
+        /// <param name="exchangeType">RabbitMQ specific exchange types (direct|fanout|headers|topic)</param>
         /// <param name="useDurableExchange">Whether the exchange is durable or not</param>
         /// <param name="doAutoDeleteExchange">Automatically delete the exchange if no queues are bound.</param>
         /// <param name="messageSerializer">A <see cref="IMessageSerializer"/> to use.</param>
@@ -55,6 +59,7 @@ namespace BusLane.Transport.RabbitMQ
             this IServiceCollection services,
             Action<ConnectionFactory> configureConnection,
             string exchangeName = Constants.DefaultExchange,
+            string exchangeType = ExchangeType.Topic,
             bool useDurableExchange = true,
             bool doAutoDeleteExchange = false,
             IMessageSerializer? messageSerializer = null)
@@ -70,6 +75,7 @@ namespace BusLane.Transport.RabbitMQ
                     builder.AddRabbitMqPublisher(
                         configureConnection,
                         exchangeName,
+                        exchangeType,
                         useDurableExchange,
                         doAutoDeleteExchange);
                 });
