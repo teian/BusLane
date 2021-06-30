@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>true</IsPackable>
     <Nullable>enable</Nullable>
     <LangVersion>default</LangVersion>
@@ -14,6 +13,7 @@
     <RepositoryUrl>https://github.com/teian/BusLane</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>message, bus, event bus, events</PackageTags>
+    <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -25,9 +25,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.8" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.8" />
-    <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.16" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.16" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.2.2" />
   </ItemGroup>
 
   <ItemGroup>
