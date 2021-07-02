@@ -1,11 +1,10 @@
-﻿using BusLane.Consuming;
+﻿using System;
+using System.Threading;
+using BusLane.Consuming;
 using BusLane.Serializing;
 using BusLane.Transport.RabbitMQ.Consuming;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using System;
-using System.Threading;
 
 namespace BusLane.Transport.RabbitMQ
 {
@@ -52,7 +51,7 @@ namespace BusLane.Transport.RabbitMQ
             
             builder.UseMessageReceiver(
                 new RabbitMqMessageReceiver(
-                    builder.LoggerFactory.CreateLogger<RabbitMqMessageReceiver>(),
+                    builder.CreateLogger<RabbitMqMessageReceiver>(),
                     connectionFactory,
                     exchangeName,
                     useDurableExchange,
@@ -95,7 +94,7 @@ namespace BusLane.Transport.RabbitMQ
             bool doAutoDeleteExchange = false,
             string exchangeType = ExchangeType.Topic,
             string queueName = "",
-            bool useDurableQueue = true,
+            bool useDurableQueue = false,
             bool useExclusiveQueue = false,
             bool autoDeleteQueue = false,
             IMessageDeserializer? messageDeserializer = null,

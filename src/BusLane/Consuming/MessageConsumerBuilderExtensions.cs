@@ -4,6 +4,9 @@ using System;
 
 namespace BusLane.Consuming
 {
+    /// <summary>
+    /// Service collection extension for the <see cref="MessageConsumerBuilder"/>.
+    /// </summary>
     public static class MessageConsumerBuilderExtensions
     {
         /// <summary>

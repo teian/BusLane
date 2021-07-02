@@ -1,10 +1,9 @@
-﻿using BusLane.Consuming;
+﻿using System.Threading;
+using BusLane.Consuming;
 using BusLane.Serializing;
 using BusLane.Transport.NatsStreaming.Consuming;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using STAN.Client;
-using System.Threading;
 
 namespace BusLane.Transport.NatsStreaming
 {
@@ -33,7 +32,7 @@ namespace BusLane.Transport.NatsStreaming
         {
             builder.UseMessageReceiver(
                 new NatsStreamingMessageReceiver(
-                    builder.LoggerFactory.CreateLogger<NatsStreamingMessageReceiver>(),
+                    builder.CreateLogger<NatsStreamingMessageReceiver>(),
                     clusterId,
                     clientId,
                     queueGroup,

@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace BusLane.Transport
 {
+    /// <summary>
+    /// A generic message receiver
+    /// </summary>
     public interface IMessageReceiver : IDisposable
     {
         /// <summary>

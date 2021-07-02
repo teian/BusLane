@@ -1,12 +1,10 @@
-﻿using BusLane.Exceptions;
-using Microsoft.Extensions.Logging;
-using STAN.Client;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BusLane.Exceptions;
+using Microsoft.Extensions.Logging;
+using STAN.Client;
 
 namespace BusLane.Transport.NatsStreaming.Consuming
 {
@@ -91,11 +89,6 @@ namespace BusLane.Transport.NatsStreaming.Consuming
             {
                 await _SubscriptionCallbacks[topic].Invoke(rawMessage);
             }
-        }
-
-        private static string ToLogString(IEnumerable<string> values)
-        {
-            return $"[{string.Join(", ", values.Select(value => $"'{value}'"))}]";
         }
 
         private async Task OnReceivedMessageAsync(StanMsgHandlerArgs eventArguments)

@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace BusLane.Consuming
 {
+    /// <summary>
+    /// A generic interface for message consumption
+    /// </summary>
     public interface IMessageConsumer
     {
         /// <summary>

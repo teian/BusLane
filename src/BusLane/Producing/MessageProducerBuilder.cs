@@ -14,7 +14,7 @@ namespace BusLane.Producing
         private IMessageSerializer _Serializer;
 
         private IMessagePublisher? _Publisher;
-        public ILoggerFactory LoggerFactory { get; }
+        private readonly ILoggerFactory _LoggerFactory;
 
         /// <summary>
         /// Initializes a new <see cref="MessageProducerBuilder"/>.
@@ -22,8 +22,18 @@ namespace BusLane.Producing
         /// <param name="loggerFactory">The factory to create logger from.</param>
         public MessageProducerBuilder(ILoggerFactory loggerFactory)
         {
-            LoggerFactory = loggerFactory;
+            _LoggerFactory = loggerFactory;
             _Serializer = new JsonMessageSerializer();
+        }
+        
+        /// <summary>
+        /// Creates a logger for a given type
+        /// </summary>
+        /// <typeparam name="TLogger">The type of the logger should be created for</typeparam>
+        /// <returns>A logger for the given type</returns>
+        public ILogger<TLogger> CreateLogger<TLogger>()
+        {
+            return _LoggerFactory.CreateLogger<TLogger>();
         }
 
         /// <summary>
@@ -61,7 +71,7 @@ namespace BusLane.Producing
             }
 
             return new MessageProducer(
-                LoggerFactory.CreateLogger<MessageProducer>(),
+                _LoggerFactory.CreateLogger<MessageProducer>(),
                 _Publisher,
                 _Serializer);
         }

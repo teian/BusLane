@@ -13,7 +13,7 @@ namespace BusLane.Consuming
     {
         private IMessageDeserializer _Deserializer;
         private IMessageReceiver? _MessageReceiver;
-        public ILoggerFactory LoggerFactory { get; }
+        private readonly ILoggerFactory _LoggerFactory;
 
         /// <summary>
         /// Initializes a new <see cref="MessageConsumerBuilder"/>.
@@ -21,8 +21,18 @@ namespace BusLane.Consuming
         /// <param name="loggerFactory">The factory to create logger from.</param>
         public MessageConsumerBuilder(ILoggerFactory loggerFactory)
         {
-            LoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+            _LoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _Deserializer = new JsonMessageDeserializer();
+        }
+
+        /// <summary>
+        /// Creates a logger for a given type
+        /// </summary>
+        /// <typeparam name="TLogger">The type of the logger should be created for</typeparam>
+        /// <returns>A logger for the given type</returns>
+        public ILogger<TLogger> CreateLogger<TLogger>()
+        {
+            return _LoggerFactory.CreateLogger<TLogger>();
         }
 
         /// <summary>
@@ -59,7 +69,7 @@ namespace BusLane.Consuming
             }
 
             MessageConsumer messageConsumer = new MessageConsumer(
-                LoggerFactory.CreateLogger<MessageConsumer>(),
+                _LoggerFactory.CreateLogger<MessageConsumer>(),
                 _MessageReceiver,
                 _Deserializer);
 

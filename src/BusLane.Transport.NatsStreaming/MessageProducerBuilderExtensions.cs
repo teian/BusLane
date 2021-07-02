@@ -2,7 +2,6 @@
 using BusLane.Serializing;
 using BusLane.Transport.NatsStreaming.Publishing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using STAN.Client;
 
 namespace BusLane.Transport.NatsStreaming
@@ -28,7 +27,7 @@ namespace BusLane.Transport.NatsStreaming
         {
             return builder.UsePublisher(
                 new NatsStreamingMessagePublisher(
-                    builder.LoggerFactory.CreateLogger<NatsStreamingMessagePublisher>(),
+                    builder.CreateLogger<NatsStreamingMessagePublisher>(),
                     clusterId,
                     clientId,
                     options));

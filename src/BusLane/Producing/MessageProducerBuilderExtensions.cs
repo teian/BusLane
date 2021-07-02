@@ -4,6 +4,9 @@ using System;
 
 namespace BusLane.Producing
 {
+    /// <summary>
+    /// <see cref="MessageProducerBuilder"/> extensions
+    /// </summary>
     public static class MessageProducerBuilderExtensions
     {
         /// <summary>

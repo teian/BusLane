@@ -1,10 +1,9 @@
-﻿using BusLane.Producing;
+﻿using System;
+using BusLane.Producing;
 using BusLane.Serializing;
 using BusLane.Transport.RabbitMQ.Publishing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using System;
 
 namespace BusLane.Transport.RabbitMQ
 {
@@ -36,7 +35,7 @@ namespace BusLane.Transport.RabbitMQ
 
             return builder.UsePublisher(
                 new RabbitMqMessagePublisher(
-                    builder.LoggerFactory.CreateLogger<RabbitMqMessagePublisher>(),
+                    builder.CreateLogger<RabbitMqMessagePublisher>(),
                     connectionFactory,
                     exchangeName,
                     exchangeType,

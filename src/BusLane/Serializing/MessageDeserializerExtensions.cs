@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace BusLane.Serializing
 {
+    /// <summary>
+    /// Extensions for the <see cref="IMessageDeserializer"/>
+    /// </summary>
     public static class MessageDeserializerExtensions
     {
         /// <summary>
