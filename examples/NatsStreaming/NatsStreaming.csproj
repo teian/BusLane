@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <UserSecretsId>dotnet-NatsStreaming-8C9F85B5-6AA4-4421-85AB-CD5F10DA8EDE</UserSecretsId>
     </PropertyGroup>
 

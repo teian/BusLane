@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
+        <TargetFramework>net8.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
@@ -17,16 +17,16 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <RepositoryUrl>https://github.com/teian/BusLane</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageTags>buslane, message, bus, event bus, events, nats, nats-streaming</PackageTags>        
+        <PackageTags>buslane, message, bus, event bus, events, nats, nats-streaming</PackageTags>
         <Description>BusLane ist a simple message bus abstraction which can be used to decouple specific broker implementations from your code</Description>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="STAN.Client" Version="0.3.0" />
+        <PackageReference Include="STAN.Client" Version="0.3.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BusLane\BusLane.csproj" />
+        <ProjectReference Include="..\BusLane\BusLane.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

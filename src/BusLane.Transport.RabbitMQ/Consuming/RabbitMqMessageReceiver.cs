@@ -42,7 +42,7 @@ namespace BusLane.Transport.RabbitMQ.Consuming
         /// <summary>
         /// Gets the channel to use when performing actions on the message broker.
         /// </summary>
-        private readonly IModel _Channel;
+        private readonly IChannel _Channel;
 
         /// <summary>
         /// Gets the name of the exchange being used on the message broker.
@@ -89,8 +89,8 @@ namespace BusLane.Transport.RabbitMQ.Consuming
             _Cancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             _Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _ExchangeName = exchangeName;
-            _Connection = connectionFactory.CreateConnection();
-            _Channel = _Connection.CreateModel();
+            _Connection = connectionFactory.CreateConnectionAsync().GetAwaiter().GetResult();
+            _Channel = _Connection.CreateChannelAsync().GetAwaiter().GetResult();
 
             if (!ExchangeType.All().Contains(exchangeType))
             {
@@ -98,30 +98,33 @@ namespace BusLane.Transport.RabbitMQ.Consuming
                     "the given exchange type is not valid, valid values are direct, fanout, headers and topic.",
                     nameof(exchangeType));
             }
-            
-            _Channel.ExchangeDeclare(_ExchangeName, exchangeType, useDurableExchange, doAutoDeleteExchange);
-            _QueueName = _Channel.QueueDeclare(queueName, useDurableQueue, useExclusiveQueue, autoDeleteQueue).QueueName;
 
-            EventingBasicConsumer consumer = new EventingBasicConsumer(_Channel);
-            consumer.Received += async (_, e) => await OnReceivedMessageAsync(e);
-            
-            consumer.Registered += (_, e) => _Logger.LogDebug(
+            _Channel.ExchangeDeclareAsync(_ExchangeName, exchangeType, useDurableExchange, doAutoDeleteExchange)
+                .GetAwaiter()
+                .GetResult();
+
+            _QueueName = _Channel.QueueDeclareAsync(queueName, useDurableQueue, useExclusiveQueue, autoDeleteQueue)
+                .GetAwaiter()
+                .GetResult()
+                .QueueName;
+
+            AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(_Channel);
+            consumer.ReceivedAsync += async (_, e) => await OnReceivedMessageAsync(e);
+
+            consumer.RegisteredAsync += async (_, e) => _Logger.LogDebug(
                 "Registered consumer {ConsumerId}",
                 ToLogString(e.ConsumerTags));
-            
-            consumer.Unregistered += (_, e) => _Logger.LogDebug(
+
+            consumer.UnregisteredAsync += async (_, e) => _Logger.LogDebug(
                 "Unregistered consumer {ConsumerId}",
                 ToLogString(e.ConsumerTags));
-            
-            consumer.Shutdown += (_, e) => _Logger.LogDebug(
+
+            consumer.ShutdownAsync += async (_, e) => _Logger.LogDebug(
                 "Shutdown consumer: {Code} ({Reason})",
                 e.ReplyCode,
                 e.ReplyText);
-            
-            consumer.ConsumerCancelled += (_, e) => _Logger.LogDebug(
-                "Cancelled consumer {ConsumerId}",
-                ToLogString(e.ConsumerTags));
-            _Channel.BasicConsume(_QueueName, true, consumer);
+
+            _Channel.BasicConsumeAsync(_QueueName, true, consumer);
         }
 
         private async Task OnReceivedMessageAsync(BasicDeliverEventArgs eventArguments)
@@ -129,6 +132,7 @@ namespace BusLane.Transport.RabbitMQ.Consuming
             try
             {
                 _Logger.LogDebug("Received message '{DeliveryTag}'", eventArguments.DeliveryTag);
+
                 _Logger.LogTrace(
                     "Received message: body:=byte[{BodyLength}], ConsumerTag:={ConsumerTag}, "
                     + "DeliveryTag:={DeliveryTag}, Exchange:={Exchange}, Redelivered:={Redelivered}, "
@@ -151,7 +155,7 @@ namespace BusLane.Transport.RabbitMQ.Consuming
                 _Logger.LogError(e, "Error while receiving message '{DeliveryTag}'", eventArguments.DeliveryTag);
             }
         }
-        
+
         private async Task HandleMessage(string topic, ReadOnlyMemory<byte> rawMessage)
         {
             if (_SubscriptionCallbacks.ContainsKey(topic.ToLowerInvariant()))
@@ -166,7 +170,7 @@ namespace BusLane.Transport.RabbitMQ.Consuming
         }
 
         /// <inheritdoc />
-        public Task SubscribeAsync(
+        public async Task SubscribeAsync(
             string topic,
             Func<ReadOnlyMemory<byte>, Task> messageReceiveAsync,
             CancellationToken cancellationToken = default)
@@ -174,19 +178,17 @@ namespace BusLane.Transport.RabbitMQ.Consuming
             if (_SubscriptionCallbacks.ContainsKey(topic.ToLowerInvariant()) == false)
             {
                 _SubscriptionCallbacks.TryAdd(topic.ToLowerInvariant(), messageReceiveAsync);
-                _Channel.QueueBind(_QueueName, _ExchangeName, topic);
+                await _Channel.QueueBindAsync(_QueueName, _ExchangeName, topic, cancellationToken: cancellationToken);
                 _Logger.LogInformation("Subscribed to topic '{Topic}'", topic);
             }
-            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        public Task UnsubscribeAsync(string topic, CancellationToken cancellationToken = default)
+        public async Task UnsubscribeAsync(string topic, CancellationToken cancellationToken = default)
         {
             _SubscriptionCallbacks.TryRemove(topic.ToLowerInvariant(), out _);
-            _Channel.QueueUnbind(_QueueName, _ExchangeName, topic);
+            await _Channel.QueueUnbindAsync(_QueueName, _ExchangeName, topic, cancellationToken: cancellationToken);
             _Logger.LogInformation("Unsubscribed from topic '{Topic}'", topic);
-            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
@@ -197,6 +199,7 @@ namespace BusLane.Transport.RabbitMQ.Consuming
                 _Logger.LogTrace(
                     "Discarded dispose of the {InstanceName} instance (already triggered)",
                     GetType().FullName);
+
                 return;
             }
 
@@ -209,8 +212,8 @@ namespace BusLane.Transport.RabbitMQ.Consuming
 
             _IsDisposing = true;
             _Cancellation.Cancel();
-            _Channel.Close();
-            _Connection.Close();
+            _Channel.CloseAsync().GetAwaiter().GetResult();
+            _Connection.CloseAsync().GetAwaiter().GetResult();
             _Connection.Dispose();
             _Channel.Dispose();
             _Cancellation.Dispose();

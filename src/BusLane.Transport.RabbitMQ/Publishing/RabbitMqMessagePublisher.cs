@@ -15,7 +15,7 @@ namespace BusLane.Transport.RabbitMQ.Publishing
         private readonly ILogger<RabbitMqMessagePublisher> _Logger;
         private readonly bool _UseDurableExchange;
         private readonly string _Exchange;
-        private readonly IModel _Channel;
+        private readonly IChannel _Channel;
         private readonly IConnection _Connection;
 
         /// <summary>
@@ -38,8 +38,8 @@ namespace BusLane.Transport.RabbitMQ.Publishing
             _Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _Exchange = exchange;
             _UseDurableExchange = useDurableExchange;
-            _Connection = connectionFactory.CreateConnection();
-            _Channel = _Connection.CreateModel();
+            _Connection = connectionFactory.CreateConnectionAsync().GetAwaiter().GetResult();
+            _Channel = _Connection.CreateChannelAsync().GetAwaiter().GetResult();
 
             if (!ExchangeType.All().Contains(exchangeType))
             {
@@ -47,8 +47,10 @@ namespace BusLane.Transport.RabbitMQ.Publishing
                     "the given exchange type is not valid, valid values are direct, fanout, headers and topic.",
                     nameof(exchangeType));
             }
-            
-            _Channel.ExchangeDeclare(_Exchange, exchangeType, _UseDurableExchange, doAutoDeleteExchange);
+
+            _Channel.ExchangeDeclareAsync(_Exchange, exchangeType, _UseDurableExchange, doAutoDeleteExchange)
+                .GetAwaiter()
+                .GetResult();
         }
 
         /// <summary>
@@ -70,13 +72,18 @@ namespace BusLane.Transport.RabbitMQ.Publishing
 
             try
             {
-                await Task.Run(() =>
-                    {
-                        IBasicProperties properties = _Channel.CreateBasicProperties();
-                        properties.Persistent = _UseDurableExchange;
-                        properties.DeliveryMode = _UseDurableExchange ? (byte) 2 : (byte) 1;
-                        _Channel.BasicPublish(_Exchange, topic, false, properties, message);
-                    },
+                var props = new BasicProperties
+                {
+                    Persistent = _UseDurableExchange,
+                    DeliveryMode = _UseDurableExchange ? DeliveryModes.Persistent : DeliveryModes.Transient
+                };
+
+                await _Channel.BasicPublishAsync(
+                    _Exchange,
+                    topic,
+                    false,
+                    props,
+                    message,
                     cancellationToken);
 
                 _Logger.LogDebug("Published to topic '{Topic}'", topic);
@@ -94,9 +101,9 @@ namespace BusLane.Transport.RabbitMQ.Publishing
         /// <returns>A task that represents the asynchronous dispose operation.</returns>
         public void Dispose()
         {
-            _Channel.Close();
+            _Channel.CloseAsync().GetAwaiter().GetResult();
             _Channel.Dispose();
-            _Connection.Close();
+            _Connection.CloseAsync().GetAwaiter().GetResult();
             _Connection.Dispose();
         }
     }
